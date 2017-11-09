@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'STP',
     version = '0.1-dev',
-    description = 'simple tasks system',
+    description = 'simple tasks platform',
     author = 'libing',
     packages = find_packages('.'),
     package_data = {

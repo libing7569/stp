@@ -1,2 +1,2 @@
 # stp
-simple tasks platform
+A simple tasks platform 
