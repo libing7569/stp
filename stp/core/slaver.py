@@ -10,6 +10,12 @@ import importlib
 import threading
 from threading import Timer
 from multiprocessing import Process
+#import pickle
+try:
+        import cPickle as pickle
+except ImportError:
+        import pickle
+
 try:
     from Queue import Queue
 except Exception as e:
@@ -108,7 +114,7 @@ class StsSlaver:
         StsManager.register('get_finished_local_tasks')
 
         StsSlaver.__logger.debug('Connect to server %s...' % ip)
-        manager = StsManager(address=(ip, port), authkey=auth)
+        manager = StsManager(address=(ip, port), authkey=auth, serializer="xmlrpclib")
         manager.connect()
 
         dispatched_local_tasks = manager.get_dispatched_local_tasks()
@@ -116,7 +122,8 @@ class StsSlaver:
 
         while True:
             taskstr = dispatched_local_tasks.get(True)
-            task = pickle.loads(taskstr)
+            print(type(taskstr))
+            task = pickle.loads(taskstr if sys.version_info < (3,) else taskstr.encode('utf-8'))
             task_type = task.type  #name-version
             if task_type in StsSlaver.processor_modules:
                 func = StsSlaver.processor_modules[task_type].Processor.proc

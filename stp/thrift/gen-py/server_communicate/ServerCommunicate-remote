@@ -26,9 +26,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Functions:')
     print('  string ping()')
     print('  string notify(string ip, i64 port)')
-    print('  string sync_tasks( tasksList)')
     print('  string get_task(string taskid)')
-    print('  string update_task(string taskid)')
     print('  string get_server_stat()')
     print('')
     sys.exit(0)
@@ -121,23 +119,11 @@ elif cmd == 'notify':
         sys.exit(1)
     pp.pprint(client.notify(args[0], eval(args[1]),))
 
-elif cmd == 'sync_tasks':
-    if len(args) != 1:
-        print('sync_tasks requires 1 args')
-        sys.exit(1)
-    pp.pprint(client.sync_tasks(eval(args[0]),))
-
 elif cmd == 'get_task':
     if len(args) != 1:
         print('get_task requires 1 args')
         sys.exit(1)
     pp.pprint(client.get_task(args[0],))
-
-elif cmd == 'update_task':
-    if len(args) != 1:
-        print('update_task requires 1 args')
-        sys.exit(1)
-    pp.pprint(client.update_task(args[0],))
 
 elif cmd == 'get_server_stat':
     if len(args) != 0:

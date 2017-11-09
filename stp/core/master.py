@@ -11,8 +11,12 @@ import psutil
 import importlib
 import threading
 import logging
-import pickle
 from threading import Timer
+#import pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 try:
     from Queue import PriorityQueue
 except Exception as e:
@@ -50,7 +54,7 @@ class StsMaster:
         self.__processor_modules = {}
         StsManager.register('get_dispatched_local_tasks', callable=lambda:self.dispatched_local_tasks)
         StsManager.register('get_finished_local_tasks', callable=lambda:self.finished_local_tasks)
-        self.__manager = StsManager(address=(self.__task_ip, self.__task_port), authkey=self.__task_auth)
+        self.__manager = StsManager(address=(self.__task_ip, self.__task_port), authkey=self.__task_auth, serializer="xmlrpclib")
         self.__manager.start()
 
     def get_processor_modules(self):
@@ -126,7 +130,10 @@ class StsMaster:
         dispatched_local_tasks = self.__manager.get_dispatched_local_tasks()
         StsMaster.__logger.debug("Dispatch local task: %s" % task_id)
         try:
-            dispatched_local_tasks.put(pickle.dumps(task))
+            taskstr = pickle.dumps(task)
+            print('master dumps put: ')
+            print(type(taskstr))
+            dispatched_local_tasks.put(taskstr if sys.version_info > (3,) else taskstr.encode('utf-8'))
             self.__tasks_map[task_id] = task
         except Exception as e:
             self.__manager.shutdown()

@@ -4,3 +4,4 @@ stspid
 build/*
 dist/*
 STP.egg-info/*
+STP_LB.egg-info/

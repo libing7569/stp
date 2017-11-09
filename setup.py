@@ -1,15 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = 'STP',
-    version = '0.1-dev',
+    name = 'STP-LB',
+    version = '0.1.dev0',
     description = 'simple tasks platform',
     author = 'libing',
+    author_email = 'libing7569@hotmail.com',
     packages = find_packages('.'),
     package_data = {
         '': ['stserver'],
         'stp': ['conf/*.yaml', 'conf/*.conf']
     },
+    url = 'https://github.com/libing7569/stp',
     include_package_data=True,
     install_requires = [
         'setuptools>=36.6.0',
