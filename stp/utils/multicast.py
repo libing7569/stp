@@ -29,7 +29,8 @@ class MulticastUtil:
                             IP_ADD_MEMBERSHIP,  
                             inet_aton(self.__mgrp) + inet_aton(self.__sip))
 
-        return sock.sendto(data+'\0', (self.__mgrp, self.__mport))
+        data += '\0'
+        return sock.sendto(data.encode('utf-8'), (self.__mgrp, self.__mport))
 
     def serve(self, func):
         sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)  
@@ -46,12 +47,12 @@ class MulticastUtil:
                 data, addr = sock.recvfrom(1024)  
                 func(data, addr)
             except Exception as e:  
-                self.__logger.exception(e.message)
+                self.__logger.exception(e)
             else:  
-                print "Receive data!"  
-                print "TIME:" , time.time()  
-                print "FROM: ", addr  
-                print "DATA: ", data 
+                self.__logger.debug("Receive data!")  
+                self.__logger.debug("TIME: %s" % time.time())
+                self.__logger.debug("FROM: %s-%s" % (addr[0], addr[1]))  
+                self.__logger.debug("DATA: %s" % data)
             time.sleep(1)
         else:
             sock.close()

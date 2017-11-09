@@ -11,11 +11,15 @@ import psutil
 import importlib
 import threading
 import logging
-from Queue import PriorityQueue
+import pickle
 from threading import Timer
+try:
+    from Queue import PriorityQueue
+except Exception as e:
+    from queue import PriorityQueue
 
-from task import Task
-from sts_manager import StsManager 
+from .task import Task
+from .sts_manager import StsManager 
 from ..utils.ip_util import IpUtil
 from ..utils.multicast import MulticastUtil
 from ..utils.server_info import ServerInfoUtil
@@ -52,7 +56,7 @@ class StsMaster:
     def get_processor_modules(self):
         sys.path.append('%s/..' % os.path.dirname(__file__))
         for processor in os.listdir(os.path.dirname(__file__)+'/../tasks/processor'):
-            if '__init__.py' in processor:
+            if '__init__.py' in processor or '__pycache__' in processor:
                 continue
             module_name = 'tasks.processor.%s.processor' % processor
             module = importlib.import_module(module_name)
@@ -74,8 +78,8 @@ class StsMaster:
         def process_msg(data, addr):
             StsMaster.__logger.debug('multicast recv: %s ip: %s port: %s' % (data, addr[0], addr[1]))
             StsMaster.__logger.debug('task_ip: %s, task_port: %s' % (self.__task_ip, self.__task_port))
-            print('data:[%s]' % data)
-            if 'slaver-probe' in data:
+            print('data:[%s]' % data.decode('utf-8'))
+            if 'slaver-probe' in data.decode('utf-8'):
                 print("-----slaver-probe-----")
                 try:
                     task_ip = IpUtil.get_ip_by_if('em1')
@@ -122,7 +126,7 @@ class StsMaster:
         dispatched_local_tasks = self.__manager.get_dispatched_local_tasks()
         StsMaster.__logger.debug("Dispatch local task: %s" % task_id)
         try:
-            dispatched_local_tasks.put(task)
+            dispatched_local_tasks.put(pickle.dumps(task))
             self.__tasks_map[task_id] = task
         except Exception as e:
             self.__manager.shutdown()
@@ -146,9 +150,9 @@ class StsMaster:
 
         try:
             while True:
-                while not dispatched_local_tasks.empty():
-                    task = finished_local_tasks.get(True)
-                    StsMaster.__logger.debug("Finished local task: %s" % task.task_id)
+                #while not dispatched_local_tasks.empty():
+                    #task = finished_local_tasks.get(True)
+                    #StsMaster.__logger.debug("Finished local task: %s" % task.task_id)
                 time.sleep(2)
         except Exception as e:
             self.__manager.shutdown()

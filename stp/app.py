@@ -48,7 +48,7 @@ def main():
     stat_refresh_interval = config['stat_refresh_interval']
     sip = args.serverip 
     sport = args.serverport
-    auth = config['auth']
+    auth = config['auth'].encode('utf-8')
     mcgrp = config['multicast_group']
     mcport = config['multicast_port']
     mttl = config['multicast_ttl']

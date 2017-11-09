@@ -4,6 +4,7 @@
 import socket
 import sys
 import os
+import logging
 #+
 sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../thrift/gen-py')
 #print(sys.path)
@@ -19,7 +20,7 @@ from thrift import Thrift
 
 class ServerCommunicateUtil:
     def __init__(self):
-        pass
+        self.__logger = logging.getLogger('sts_master')
 
     def serve(self, ip, port, handler):
         processor = ServerCommunicate.Processor(handler)
@@ -27,9 +28,9 @@ class ServerCommunicateUtil:
         tfactory = TTransport.TBufferedTransportFactory()
         pfactory = TBinaryProtocol.TBinaryProtocolFactory()
         server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
-        print "Starting thrift server in python..."
+        #print "Starting thrift server in python..."
         server.serve()
-        print "done!"
+        #print "done!"
 
     def call(self, op, rip, rport, *args):
         try:
@@ -38,9 +39,9 @@ class ServerCommunicateUtil:
             protocol = TBinaryProtocol.TBinaryProtocol(transport)
             client = ServerCommunicate.Client(protocol)
             transport.open()
-            print "client - ping"
-            print "server - " + client.ping()
-            print "client - say"
+            self.__logger.debug("client - ping")
+            self.__logger.debug("server - " + client.ping())
+            self.__logger.debug("client - say")
             if op == 'notify':
                 client.notify(args[0], args[1])
             elif op == 'ping':
@@ -48,11 +49,10 @@ class ServerCommunicateUtil:
             else:
                 pass
             #msg = client.sync_tasks({'h1':'hello', 'h2':'hello2'})
-            print "server - ok"
+            self.__logger.debug("server - ok")
             transport.close()
-        except Thrift.TException, ex:
-            print "%s" % (ex.message)
-            pass
+        except Thrift.TException as e:
+            self.__logger.error(e.message)
 
 class ServerCommunicateHandler:
     def ping(self):

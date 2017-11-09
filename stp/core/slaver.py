@@ -3,16 +3,20 @@
 
 import time
 import logging
+import pickle
 import os
 import sys
 import importlib
 import threading
 from threading import Timer
-from Queue import Queue
 from multiprocessing import Process
+try:
+    from Queue import Queue
+except Exception as e:
+    from queue import Queue
 
-from task import Task
-from sts_manager import StsManager
+from .task import Task
+from .sts_manager import StsManager
 from ..utils.server_info import ServerInfoUtil
 from ..utils.multicast import MulticastUtil
 from ..utils.server_communicate_util import ServerCommunicateUtil
@@ -39,7 +43,7 @@ class StsSlaver:
     def get_processor_modules(self):
         sys.path.append('%s/..' % os.path.dirname(__file__))
         for processor in os.listdir(os.path.dirname(__file__)+'/../tasks/processor'):
-            if '__init__.py' in processor:
+            if '__init__.py' in processor or '__pycache__' in processor:
                 continue
             module_name = 'tasks.processor.%s.processor' % processor
             module = importlib.import_module(module_name)
@@ -111,7 +115,8 @@ class StsSlaver:
         finished_local_tasks = manager.get_finished_local_tasks()
 
         while True:
-            task = dispatched_local_tasks.get(True)
+            taskstr = dispatched_local_tasks.get(True)
+            task = pickle.loads(taskstr)
             task_type = task.type  #name-version
             if task_type in StsSlaver.processor_modules:
                 func = StsSlaver.processor_modules[task_type].Processor.proc
@@ -124,7 +129,7 @@ class StsSlaver:
             #process.join()
             #task.call(func)
             time.sleep(1)
-            finished_local_tasks.put(task)
+            #finished_local_tasks.put(task)
 
     def start(self):
         self.get_processor_modules()
