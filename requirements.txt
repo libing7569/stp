@@ -1,4 +1,4 @@
-setuptools==36.6.0
+setuptools==65.5.1
 prompt_toolkit==1.0.15
 psutil==5.4.0
 Flask==0.12.2
